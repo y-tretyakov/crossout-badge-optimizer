@@ -1,13 +1,6 @@
 # Crossout Badge Optimizer
 
 <p align="center">
-  🇺🇸 <a href="README.md">English</a> •
-  🇷🇺 <a href="README.ru.md">Русский</a> •
-  🇩🇪 <a href="README.de.md">Deutsch</a> •
-  🇫🇷 <a href="README.fr.md">Français</a>
-</p>
-
-<p align="center">
   <img src="assets/banner.png" alt="Crossout Badge Optimizer Banner" width="100%">
 </p>
 
@@ -16,10 +9,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/license/YOUR_USERNAME/crossout-badge-optimizer?style=for-the-badge">
-  <img src="https://img.shields.io/github/stars/YOUR_USERNAME/crossout-badge-optimizer?style=for-the-badge">
-  <img src="https://img.shields.io/github/last-commit/YOUR_USERNAME/crossout-badge-optimizer?style=for-the-badge">
-  <img src="https://img.shields.io/badge/JavaScript-Vanilla-yellow?style=for-the-badge">
+  🇺🇸 <a href="README.en.md">English</a> •
+  🇷🇺 <a href="README.md">Русский</a> •
+  🇩🇪 <a href="README.de.md">Deutsch</a> •
+  🇫🇷 <a href="README.fr.md">Français</a>
 </p>
 
 # Crossout Badge Optimizer
