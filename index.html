@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crossout Badge Optimizer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Стилизация под тему Crossout (ржавчина, металл, темный индастриал) */
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Roboto+Condensed:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            background-color: #0b0f14;
+            color: #e2e8f0;
+        }
+        
+        .accent-font {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Кастомный скроллбар */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #f59e0b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d97706;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Хедер / Шапка -->
+    <header class="border-b-2 border-amber-600 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <!-- Иконка шестеренки/значка в стиле Crossout -->
+                <div class="p-2 bg-gradient-to-br from-amber-500 to-orange-700 rounded-lg shadow-md animate-pulse">
+                    <svg class="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wider text-amber-500 uppercase accent-font" data-i18n="headerTitle">CROSSOUT BADGE OPTIMIZER</h1>
+                    <p class="text-xs text-slate-400" data-i18n="headerSubtitle">Расчет выгоды обмена значков механиков на ресурсы</p>
+                </div>
+            </div>
+            
+            <!-- Информационный статус и языковой селектор -->
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+                <div class="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-lg p-2 px-4 text-xs">
+                    <span class="flex h-2 w-2 relative">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </span>
+                    <span class="text-slate-300" data-i18n="headerStatus">Ручной ввод цен (рекомендуемый метод)</span>
+                </div>
+
+                <!-- Селектор языков -->
+                <div class="flex items-center gap-1 bg-slate-950 p-1.5 rounded-lg border border-slate-800">
+                    <button onclick="changeLanguage('en')" id="lang-btn-en" class="px-2 py-1 text-xs font-bold rounded hover:bg-slate-800 transition-colors uppercase">EN</button>
+                    <button onclick="changeLanguage('ru')" id="lang-btn-ru" class="px-2 py-1 text-xs font-bold rounded hover:bg-slate-800 transition-colors uppercase">RU</button>
+                    <button onclick="changeLanguage('de')" id="lang-btn-de" class="px-2 py-1 text-xs font-bold rounded hover:bg-slate-800 transition-colors uppercase">DE</button>
+                    <button onclick="changeLanguage('fr')" id="lang-btn-fr" class="px-2 py-1 text-xs font-bold rounded hover:bg-slate-800 transition-colors uppercase">FR</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 mt-8">
+        
+        <!-- Контрольная панель пользователя (Баланс значков, Налог, Сброс) -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <!-- Ввод значков -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex flex-col justify-between relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <!-- Иконка значка -->
+                    <svg class="w-24 h-24 text-amber-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M2.166 4.9c-.115-.81.417-1.528 1.222-1.63a49.197 49.197 0 0113.224 0c.805.102 1.337.82 1.222 1.63a48.163 48.163 0 01-1.396 6.554c-.58 1.954-1.851 3.595-3.6 4.545A48.64 48.64 0 0110 17.5a48.64 48.64 0 01-4.652-.511c-1.749-.95-3.02-2.59-3.6-4.545A48.163 48.163 0 012.166 4.9zM10 5a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1zm0 6a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div class="z-10">
+                    <label for="total-badges" class="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2" data-i18n="badgesInputLabel">
+                        Ваши значки механиков:
+                    </label>
+                    <div class="relative rounded-lg shadow-sm">
+                        <input 
+                            type="number" 
+                            id="total-badges" 
+                            value="3000" 
+                            min="0"
+                            class="w-full bg-slate-950 border-2 border-slate-800 focus:border-amber-500 text-amber-500 text-3xl font-bold rounded-lg p-3 pr-16 focus:outline-none transition-colors accent-font"
+                            oninput="calculateProfitability()"
+                        >
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-500 font-bold" id="badge-unit" data-i18n="badgesInputSuffix">
+                            шт.
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-500 mt-2 z-10" data-i18n="badgesInputDesc">Введите сумму накопленных значков для симуляции закупа.</p>
+            </div>
+
+            <!-- Переключатель Налога -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex flex-col justify-between">
+                <div>
+                    <span class="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3" data-i18n="marketTaxLabel">Комиссия рынка:</span>
+                    <label class="relative flex items-center justify-between p-3 bg-slate-950 rounded-lg border border-slate-800 cursor-pointer hover:border-slate-700 transition-colors">
+                        <span class="flex flex-col">
+                            <span class="text-sm font-bold text-slate-200" data-i18n="marketTaxToggle">Учитывать налог 10%</span>
+                            <span class="text-xs text-slate-500" data-i18n="marketTaxDesc">Показывает чистую прибыль при продаже ресурсов</span>
+                        </span>
+                        <input 
+                            type="checkbox" 
+                            id="apply-tax" 
+                            checked 
+                            class="sr-only peer"
+                            onchange="calculateProfitability()"
+                        >
+                        <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[10px] after:right-[18px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600 peer-checked:after:bg-slate-950"></div>
+                    </label>
+                </div>
+                <p class="text-xs text-slate-500 mt-2" data-i18n="marketTaxFoot">Рынок забирает 10% от суммы продажи. Выключите, если планируете крафтить сами.</p>
+            </div>
+
+            <!-- Быстрые действия / Статистика -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex flex-col justify-between">
+                <div>
+                    <span class="block text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2" data-i18n="actionsLabel">Управление ценами:</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button 
+                            onclick="resetToDefault()" 
+                            class="px-3 py-2 bg-slate-950 hover:bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold text-slate-300 hover:text-amber-500 transition-colors uppercase"
+                            data-i18n="resetPrices"
+                        >
+                            Сбросить цены
+                        </button>
+                        <button 
+                            onclick="clearAllPrices()" 
+                            class="px-3 py-2 bg-slate-950 hover:bg-red-950/40 border border-slate-700 hover:border-red-800 rounded-lg text-xs font-bold text-slate-300 hover:text-red-400 transition-colors uppercase"
+                            data-i18n="clearPrices"
+                        >
+                            Обнулить всё
+                        </button>
+                    </div>
+                </div>
+                <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+                    <span data-i18n="uniquePositions">Уникальных позиций:</span>
+                    <span id="items-count-badge" class="font-bold text-amber-500 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">7</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Главный экран: Карточки ресурсов и Результат -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- ЛЕВАЯ КОЛОНКА: Настройка ресурсов (8 из 12) -->
+            <div class="lg:col-span-7 xl:col-span-8 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                        </svg>
+                        <span data-i18n="resourcesHeading">Ресурсы и предложения недели</span>
+                    </h2>
+                    <button 
+                        onclick="addNewItemModal()" 
+                        class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-lg text-xs uppercase tracking-wider transition-colors flex items-center gap-1 shadow-md"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span data-i18n="addButton">Добавить</span>
+                    </button>
+                </div>
+
+                <!-- Список редактируемых ресурсов (Карточки) -->
+                <div id="resources-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Будет сгенерировано динамически из JS -->
+                </div>
+            </div>
+
+            <!-- ПРАВАЯ КОЛОНКА: Результаты и Аналитика (4 из 12) -->
+            <div class="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-24">
+                
+                <!-- Блок Победителя / Лучшего выбора -->
+                <div class="bg-gradient-to-b from-amber-950/20 to-slate-950 border-2 border-amber-500/50 rounded-xl p-6 shadow-2xl relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+                    
+                    <h2 class="text-sm font-bold text-amber-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <span class="flex h-2.5 w-2.5 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50"></span>
+                        <span data-i18n="bestChoiceHeading">Наилучший выбор для обмена:</span>
+                    </h2>
+
+                    <div id="best-deal-box">
+                        <!-- Сюда вставится лучший оффер динамически -->
+                    </div>
+                </div>
+
+                <!-- Полный рейтинг выгоды -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4" data-i18n="ratingHeading">Сравнительный рейтинг (монет за 1 значок):</h3>
+                    
+                    <!-- Контейнер для прогресс-баров рейтинга -->
+                    <div id="rating-bars-container" class="space-y-4">
+                        <!-- Будет заполнено через JS -->
+                    </div>
+                </div>
+
+                <!-- Справка / Помощь -->
+                <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 text-xs text-slate-400 space-y-2">
+                    <h4 class="font-bold text-slate-300 uppercase" data-i18n="tipsHeading">💡 Советы выживальщика:</h4>
+                    <p data-i18n="tip1">• Еженедельно проверяйте вкладку «Обмен значков» в игре. Количество ресурсов за обмен (например, 100 или 500 штук) и их цена в значках часто меняются.</p>
+                    <p data-i18n="tip2">• Внимательно следите за ценами на Контейнер первопроходца (фиолетовый) и Контейнер странника (синий). Зачастую продажа сундуков — самый стабильный и выгодный слив значков.</p>
+                    <p data-i18n="tip3">• Оптимизатор мгновенно рассчитывает коэффициент: Выручка / Значки. Чем он выше, тем больше игровых монет (Coins) вы получите.</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Модальное окно создания/редактирования нового ресурса -->
+    <div id="item-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border-2 border-amber-600 rounded-xl w-full max-w-md overflow-hidden shadow-2xl">
+            <!-- Заголовок модалки -->
+            <div class="bg-slate-950 p-4 border-b border-slate-800 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-amber-500 uppercase tracking-wider accent-font" id="modal-title" data-i18n="addModalTitle">Добавить позицию</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Форма -->
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1" data-i18n="modalResName">Название ресурса:</label>
+                    <input type="text" id="modal-name" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-amber-500">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1" data-i18n="modalBadges">Значков за обмен:</label>
+                        <input type="number" id="modal-badges" min="1" placeholder="150" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1" data-i18n="modalYield">Кол-во за обмен:</label>
+                        <input type="number" id="modal-yield" min="1" placeholder="100" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-amber-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1" data-i18n="modalPrice">Цена на рынке (Монеты):</label>
+                        <input type="number" step="0.01" id="modal-price" min="0" placeholder="18.50" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1" data-i18n="modalPack">Размер пачки рынка:</label>
+                        <select id="modal-pack" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-amber-500">
+                            <option value="100" data-i18n="pack100">за 100 шт.</option>
+                            <option value="1000" data-i18n="pack1000">за 1000 шт.</option>
+                            <option value="1" data-i18n="pack1">за 1 шт. (контейнер)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- Футер модалки -->
+            <div class="bg-slate-950 p-4 border-t border-slate-800 flex justify-end gap-3">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-850 hover:bg-slate-800 text-slate-300 font-bold rounded-lg text-xs uppercase tracking-wider transition-colors" data-i18n="cancel">
+                    Отмена
+                </button>
+                <button onclick="saveNewItem()" class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-lg text-xs uppercase tracking-wider transition-colors shadow-lg" data-i18n="save">
+                    Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Шаблон уведомлений -->
+    <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-amber-600 border border-amber-500 text-slate-950 font-bold px-4 py-3 rounded-lg shadow-2xl flex items-center gap-2 transform translate-y-10 opacity-0 transition-all duration-300">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span id="toast-message">Действие выполнено</span>
+    </div>
+
+    <script>
+        // Словарь локализации для интерфейса
+        const i18n = {
+            en: {
+                headerTitle: "CROSSOUT BADGE OPTIMIZER",
+                headerSubtitle: "Calculation of engineer badges exchange profit for resources",
+                headerStatus: "Manual price entry (recommended)",
+                badgesInputLabel: "Your Engineer Badges:",
+                badgesInputSuffix: "pcs.",
+                badgesInputDesc: "Enter the number of accumulated badges to simulate purchase.",
+                marketTaxLabel: "Market fee:",
+                marketTaxToggle: "Include 10% tax",
+                marketTaxDesc: "Shows net profit when selling resources",
+                marketTaxFoot: "The market takes 10% of the sale. Turn off if you craft yourself.",
+                actionsLabel: "Manage Prices:",
+                resetPrices: "Reset Prices",
+                clearPrices: "Clear All",
+                uniquePositions: "Unique positions:",
+                resourcesHeading: "Resources and weekly offers",
+                addButton: "Add",
+                bestChoiceHeading: "Best choice for exchange:",
+                ratingHeading: "Comparative rating (coins per 1 badge):",
+                tipsHeading: "💡 Wasteland Tips:",
+                tip1: "• Check the «Badge Exchange» tab in the game weekly. The amount of resources (e.g., 100 or 500) and badge costs change often.",
+                tip2: "• Watch Pathfinder's (purple) and Wanderer's (blue) crates. Selling containers is often the most stable and profitable badge dump.",
+                tip3: "• The optimizer calculates the ratio: Revenue / Badges. The higher it is, the more Gold Coins you get.",
+                addModalTitle: "Add Position",
+                modalResName: "Resource Name:",
+                modalResNamePlaceholder: "e.g., Plastic (promo)",
+                modalBadges: "Badges per exchange:",
+                modalYield: "Amount per exchange:",
+                modalPrice: "Market price (Coins):",
+                modalPack: "Market pack size:",
+                pack100: "per 100 pcs.",
+                pack1000: "per 1000 pcs.",
+                pack1: "per 1 pc.",
+                cancel: "Cancel",
+                save: "Save",
+                toastReset: "Prices and limits reset to defaults!",
+                toastClear: "All prices cleared! Start entering prices.",
+                toastAdd: "successfully added!",
+                toastDelete: "removed!",
+                noBadgesError: "Not enough engineer badges to make at least one exchange, or prices are not filled.",
+                bestProfitDesc: "Provides the best conversion of your badges to in-game gold",
+                efficiency: "Efficiency:",
+                coinsPerBadge: "coins/badge",
+                availableExchanges: "Available exchanges:",
+                times: "time(s)",
+                badgesSpent: "Badges spent:",
+                resourceReceived: "You will receive resource:",
+                netRevenue: "Net market revenue:",
+                coins: "coins",
+                freeBadges: "Free badge remainder:",
+                fillFieldsAlert: "Please fill in all fields with correct data!",
+                badgeCostCard: "Price in badges:",
+                receiveCard: "Given per exchange:",
+                marketPriceCard: "Market price (coins):",
+                packCard: "Market pack:",
+                
+                // Названия ресурсов по умолчанию
+                "plastic": "Plastic",
+                "electronics": "Electronics",
+                "wires": "Wires",
+                "scrap": "Scrap Metal",
+                "copper": "Copper",
+                "pathfinder-crate": "Pathfinder's Crate (Epic)",
+                "wanderer-crate": "Wanderer's Crate (Special)"
+            },
+            ru: {
+                headerTitle: "CROSSOUT BADGE OPTIMIZER",
+                headerSubtitle: "Расчет выгоды обмена значков механиков на ресурсы",
+                headerStatus: "Ручной ввод цен (рекомендуемый метод)",
+                badgesInputLabel: "Ваши значки механиков:",
+                badgesInputSuffix: "шт.",
+                badgesInputDesc: "Введите сумму накопленных значков для симуляции закупа.",
+                marketTaxLabel: "Комиссия рынка:",
+                marketTaxToggle: "Учитывать налог 10%",
+                marketTaxDesc: "Показывает чистую прибыль при продаже ресурсов",
+                marketTaxFoot: "Рынок забирает 10% от суммы продажи. Выключите, если планируете крафтить сами.",
+                actionsLabel: "Управление ценами:",
+                resetPrices: "Сбросить цены",
+                clearPrices: "Обнулить всё",
+                uniquePositions: "Уникальных позиций:",
+                resourcesHeading: "Ресурсы и предложения недели",
+                addButton: "Добавить",
+                bestChoiceHeading: "Наилучший выбор для обмена:",
+                ratingHeading: "Сравнительный рейтинг (монет за 1 значок):",
+                tipsHeading: "💡 Советы выживальщика:",
+                tip1: "• Еженедельно проверяйте вкладку «Обмен значков» в игре. Количество ресурсов за обмен (например, 100 или 500 штук) и их цена в значках часто меняются.",
+                tip2: "• Внимательно следите за ценами на Контейнер первопроходца (фиолетовый) и Контейнер странника (синий). Зачастую продажа сундуков — самый стабильный и выгодный слив значков.",
+                tip3: "• Оптимизатор мгновенно рассчитывает коэффициент: Выручка / Значки. Чем он выше, тем больше игровых монет (Coins) вы получите.",
+                addModalTitle: "Добавить позицию",
+                modalResName: "Название ресурса:",
+                modalResNamePlaceholder: "Например: Пластик (акция)",
+                modalBadges: "Значков за обмен:",
+                modalYield: "Кол-во за обмен:",
+                modalPrice: "Цена на рынке (Монеты):",
+                modalPack: "Размер пачки рынка:",
+                pack100: "за 100 шт.",
+                pack1000: "за 1000 шт.",
+                pack1: "за 1 шт. (контейнер)",
+                cancel: "Отмена",
+                save: "Сохранить",
+                toastReset: "Цены и лимиты сброшены до стандартных!",
+                toastClear: "Все цены очищены! Начните ввод цен.",
+                toastAdd: "успешно добавлена!",
+                toastDelete: "удалена!",
+                noBadgesError: "Недостаточно значков механиков для проведения хотя бы одного обмена, или цены не заполнены.",
+                bestProfitDesc: "Обеспечивает лучшую конверсию ваших значков в игровое золото",
+                efficiency: "Эффективность:",
+                coinsPerBadge: "монет/зн.",
+                availableExchanges: "Доступно сделок обмена:",
+                times: "раз(а)",
+                badgesSpent: "Потратится значков:",
+                resourceReceived: "Вы получите ресурса:",
+                netRevenue: "Чистая выручка на рынке:",
+                coins: "монет",
+                freeBadges: "Свободный остаток значков:",
+                fillFieldsAlert: "Пожалуйста, заполните все поля корректными данными!",
+                badgeCostCard: "Цена в значках:",
+                receiveCard: "Дают за обмен:",
+                marketPriceCard: "Цена рынка (монеты):",
+                packCard: "Рыночная пачка:",
+
+                // Названия ресурсов по умолчанию
+                "plastic": "Пластик",
+                "electronics": "Электроника",
+                "wires": "Провода",
+                "scrap": "Металлолом",
+                "copper": "Медь",
+                "pathfinder-crate": "Сундук первопроходца (Фиол.)",
+                "wanderer-crate": "Сундук странника (Синий)"
+            },
+            de: {
+                headerTitle: "CROSSOUT ABZEICHEN OPTIMIERER",
+                headerSubtitle: "Berechnung des Nutzens des Austauschs von Ingenieursabzeichen gegen Ressourcen",
+                headerStatus: "Manuelle Preiseingabe (empfohlen)",
+                badgesInputLabel: "Ihre Ingenieursabzeichen:",
+                badgesInputSuffix: "Stk.",
+                badgesInputDesc: "Geben Sie die Anzahl der gesammelten Abzeichen ein, um den Kauf zu simulieren.",
+                marketTaxLabel: "Marktgebühr:",
+                marketTaxToggle: "10% Steuer einbeziehen",
+                marketTaxDesc: "Zeigt den Nettogewinn beim Verkauf von Ressourcen",
+                marketTaxFoot: "Der Markt nimmt 10% des Verkaufs. Deaktivieren, wenn Sie selbst herstellen.",
+                actionsLabel: "Preise verwalten:",
+                resetPrices: "Preise zurücksetzen",
+                clearPrices: "Alles löschen",
+                uniquePositions: "Einzigartige Positionen:",
+                resourcesHeading: "Ressourcen und Wochenangebote",
+                addButton: "Hinzufügen",
+                bestChoiceHeading: "Beste Wahl für den Tausch:",
+                ratingHeading: "Vergleichsbewertung (Münzen pro 1 Abzeichen):",
+                tipsHeading: "💡 Wasteland-Tipps:",
+                tip1: "• Überprüfen Sie wöchentlich den Reiter «Abzeichen-Tausch» im Spiel. Die Ressourcenmenge (z.B. 100 oder 500) und die Abzeichenkosten ändern sich häufig.",
+                tip2: "• Achten Sie auf die Pfadfinder-Kiste (lila) und die Wanderer-Kiste (blau). Der Verkauf von Kisten ist oft die stabilste Methode.",
+                tip3: "• Der Optimierer berechnet das Verhältnis: Einnahmen / Abzeichen. Je höher es ist, desto mehr Goldmünzen erhalten Sie.",
+                addModalTitle: "Position hinzufügen",
+                modalResName: "Ressourcenname:",
+                modalResNamePlaceholder: "z.B. Plastik (Aktion)",
+                modalBadges: "Abzeichen pro Tausch:",
+                modalYield: "Menge pro Tausch:",
+                modalPrice: "Marktpreis (Münzen):",
+                modalPack: "Marktpaketgröße:",
+                pack100: "pro 100 Stk.",
+                pack1000: "pro 1000 Stk.",
+                pack1: "pro 1 Stk.",
+                cancel: "Abbrechen",
+                save: "Speichern",
+                toastReset: "Preise und Limits wurden zurückgesetzt!",
+                toastClear: "Alle Preise gelöscht! Beginnen Sie mit der Eingabe.",
+                toastAdd: "erfolgreich hinzugefügt!",
+                toastDelete: "entfernt!",
+                noBadgesError: "Nicht genügend Abzeichen für einen Tausch vorhanden oder Preise sind leer.",
+                bestProfitDesc: "Bietet die beste Umwandlung Ihrer Abzeichen in Spielgold",
+                efficiency: "Effizienz:",
+                coinsPerBadge: "Münzen/Abz.",
+                availableExchanges: "Verfügbare Tauschgeschäfte:",
+                times: "Mal",
+                badgesSpent: "Abzeichen ausgegeben:",
+                resourceReceived: "Erhaltene Ressourcen:",
+                netRevenue: "Nettomarktertrag:",
+                coins: "Münzen",
+                freeBadges: "Verbleibende Abzeichen:",
+                fillFieldsAlert: "Bitte füllen Sie alle Felder korrekt aus!",
+                badgeCostCard: "Abzeichen Kosten:",
+                receiveCard: "Menge pro Tausch:",
+                marketPriceCard: "Marktpreis (Münzen):",
+                packCard: "Marktpaket:",
+
+                // Названия ресурсов по умолчанию
+                "plastic": "Plastik",
+                "electronics": "Elektronik",
+                "wires": "Drähte",
+                "scrap": "Schrott",
+                "copper": "Kupfer",
+                "pathfinder-crate": "Pfadfinderkiste (Episch)",
+                "wanderer-crate": "Wandererkiste (Spezial)"
+            },
+            fr: {
+                headerTitle: "OPTIMISATEUR DE BADGES CROSSOUT",
+                headerSubtitle: "Calcul du bénéfice de l'échange de badges d'ingénieur contre des ressources",
+                headerStatus: "Saisie manuelle des prix (recommandé)",
+                badgesInputLabel: "Vos Badges d'Ingénieur :",
+                badgesInputSuffix: "pces",
+                badgesInputDesc: "Saisissez le nombre de badges accumulés pour simuler l'achat.",
+                marketTaxLabel: "Frais de marché :",
+                marketTaxToggle: "Inclure la taxe de 10%",
+                marketTaxDesc: "Affiche le bénéfice net lors de la vente de ressources",
+                marketTaxFoot: "Le marché prend 10% de la vente. Désactivez si vous fabriquez vous-même.",
+                actionsLabel: "Gérer les Prix :",
+                resetPrices: "Réinitialiser",
+                clearPrices: "Tout effacer",
+                uniquePositions: "Positions uniques :",
+                resourcesHeading: "Ressources et offres de la semaine",
+                addButton: "Ajouter",
+                bestChoiceHeading: "Meilleur choix pour l'échange :",
+                ratingHeading: "Classement comparatif (pièces par 1 badge) :",
+                tipsHeading: "💡 Conseils du Wasteland :",
+                tip1: "• Vérifiez l'onglet « Échange de badges » en jeu chaque semaine. La quantité de ressources (ex: 100 ou 500) et le coût en badges changent souvent.",
+                tip2: "• Surveillez la caisse de pionnier (violette) et de voyageur (bleue). La vente de coffres est souvent l'échange le plus stable.",
+                tip3: "• L'optimisateur calcule le rapport : Revenu / Badges. Plus il est élevé, plus vous obtiendrez de pièces d'or.",
+                addModalTitle: "Ajouter une position",
+                modalResName: "Nom de la ressource :",
+                modalResNamePlaceholder: "ex: Plastique (promo)",
+                modalBadges: "Badges par échange :",
+                modalYield: "Quantité par échange :",
+                modalPrice: "Prix du marché (Pièces) :",
+                modalPack: "Taille du paquet :",
+                pack100: "pour 100 pces",
+                pack1000: "pour 1000 pces",
+                pack1: "pour 1 pce",
+                cancel: "Annuler",
+                save: "Sauvegarder",
+                toastReset: "Les prix et limites ont été réinitialisés !",
+                toastClear: "Tous les prix ont été effacés ! Saisissez de nouveaux prix.",
+                toastAdd: "ajouté avec succès !",
+                toastDelete: "supprimé !",
+                noBadgesError: "Pas assez de badges d'ingénieur pour effectuer un échange, ou prix non saisis.",
+                bestProfitDesc: "Fournit la meilleure conversion de vos badges en or du jeu",
+                efficiency: "Efficacité :",
+                coinsPerBadge: "pièces/badge",
+                availableExchanges: "Échanges disponibles :",
+                times: "fois",
+                badgesSpent: "Badges dépensés :",
+                resourceReceived: "Ressources reçues :",
+                netRevenue: "Revenu net du marché :",
+                coins: "pièces",
+                freeBadges: "Badges restants :",
+                fillFieldsAlert: "Veuillez remplir tous les champs correctement !",
+                badgeCostCard: "Coût en badges :",
+                receiveCard: "Quantité par échange :",
+                marketPriceCard: "Prix du marché (pièces) :",
+                packCard: "Paquet du marché :",
+
+                // Названия ресурсов по умолчанию
+                "plastic": "Plastique",
+                "electronics": "Électronique",
+                "wires": "Câbles",
+                "scrap": "Ferraille",
+                "copper": "Cuivre",
+                "pathfinder-crate": "Caisse de pionnier (Épique)",
+                "wanderer-crate": "Caisse de voyageur (Spécial)"
+            }
+        };
+
+        // Исходные данные
+        const defaultItems = [
+            {
+                id: "plastic",
+                nameKey: "plastic",
+                badgesCost: 150,
+                amountReceived: 100,
+                marketPrice: 19.50,
+                packSize: 100,
+                color: "emerald"
+            },
+            {
+                id: "electronics",
+                nameKey: "electronics",
+                badgesCost: 400,
+                amountReceived: 100,
+                marketPrice: 32.80,
+                packSize: 100,
+                color: "indigo"
+            },
+            {
+                id: "wires",
+                nameKey: "wires",
+                badgesCost: 100,
+                amountReceived: 100,
+                marketPrice: 9.15,
+                packSize: 100,
+                color: "blue"
+            },
+            {
+                id: "scrap",
+                nameKey: "scrap",
+                badgesCost: 150,
+                amountReceived: 500,
+                marketPrice: 4.80,
+                packSize: 100,
+                color: "slate"
+            },
+            {
+                id: "copper",
+                nameKey: "copper",
+                badgesCost: 150,
+                amountReceived: 500,
+                marketPrice: 1.70,
+                packSize: 100,
+                color: "amber"
+            },
+            {
+                id: "pathfinder-crate",
+                nameKey: "pathfinder-crate",
+                badgesCost: 3000,
+                amountReceived: 1,
+                marketPrice: 410.00,
+                packSize: 1,
+                color: "purple"
+            },
+            {
+                id: "wanderer-crate",
+                nameKey: "wanderer-crate",
+                badgesCost: 600,
+                amountReceived: 1,
+                marketPrice: 78.50,
+                packSize: 1,
+                color: "cyan"
+            }
+        ];
+
+        // Глобальное состояние
+        let currentLang = localStorage.getItem('badges_lang') || 'ru';
+        let items = JSON.parse(JSON.stringify(defaultItems));
+
+        const colorClasses = {
+            emerald: { bg: 'border-emerald-500/20 hover:border-emerald-500/50', text: 'text-emerald-400' },
+            indigo: { bg: 'border-indigo-500/20 hover:border-indigo-500/50', text: 'text-indigo-400' },
+            blue: { bg: 'border-blue-500/20 hover:border-blue-500/50', text: 'text-blue-400' },
+            slate: { bg: 'border-slate-500/20 hover:border-slate-500/50', text: 'text-slate-300' },
+            amber: { bg: 'border-amber-500/20 hover:border-amber-500/50', text: 'text-amber-400' },
+            purple: { bg: 'border-purple-500/20 hover:border-purple-500/50', text: 'text-purple-400' },
+            cyan: { bg: 'border-cyan-500/20 hover:border-cyan-500/50', text: 'text-cyan-400' },
+            default: { bg: 'border-slate-800 hover:border-amber-500/40', text: 'text-amber-500' }
+        };
+
+        // Запуск
+        window.onload = function() {
+            setLanguage(currentLang);
+            renderResources();
+            calculateProfitability();
+        };
+
+        // Переключение языка
+        function changeLanguage(lang) {
+            currentLang = lang;
+            localStorage.setItem('badges_lang', lang);
+            setLanguage(lang);
+            renderResources();
+            calculateProfitability();
+        }
+
+        // Применение переводов к статическим элементам DOM
+        function setLanguage(lang) {
+            // Подсветка активной кнопки в селекторе
+            ['en', 'ru', 'de', 'fr'].forEach(l => {
+                const btn = document.getElementById(`lang-btn-${l}`);
+                if (l === lang) {
+                    btn.classList.add('bg-amber-600', 'text-slate-950');
+                    btn.classList.remove('text-slate-400');
+                } else {
+                    btn.classList.remove('bg-amber-600', 'text-slate-950');
+                    btn.classList.add('text-slate-400');
+                }
+            });
+
+            // Перевод всех статических строк
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                if (i18n[lang] && i18n[lang][key]) {
+                    element.innerHTML = i18n[lang][key];
+                }
+            });
+
+            // Обновление плейсхолдера инпута в модальном окне
+            const modalNameInput = document.getElementById('modal-name');
+            if (modalNameInput && i18n[lang]['modalResNamePlaceholder']) {
+                modalNameInput.placeholder = i18n[lang]['modalResNamePlaceholder'];
+            }
+        }
+
+        // Получение перевода (с фоллбеком)
+        function t(key) {
+            return (i18n[currentLang] && i18n[currentLang][key]) || key;
+        }
+
+        // Отрисовка списка ресурсов
+        function renderResources() {
+            const container = document.getElementById('resources-container');
+            container.innerHTML = '';
+            
+            document.getElementById('items-count-badge').textContent = items.length;
+
+            items.forEach((item) => {
+                const colors = colorClasses[item.color] || colorClasses.default;
+                
+                // Получаем переведенное или кастомное имя ресурса
+                const displayName = item.nameKey ? t(item.nameKey) : item.name;
+
+                const cardHtml = `
+                    <div class="bg-slate-900 border ${colors.bg} rounded-xl p-4 shadow-md transition-all flex flex-col justify-between group">
+                        
+                        <!-- Шапка карточки -->
+                        <div class="flex items-start justify-between gap-2 mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="h-3 w-3 rounded-full bg-slate-950 border border-slate-700 flex items-center justify-center">
+                                    <span class="h-1.5 w-1.5 rounded-full ${item.color ? 'bg-' + item.color + '-400' : 'bg-amber-500'}"></span>
+                                </span>
+                                <span class="font-bold text-slate-100 text-base uppercase tracking-wide truncate max-w-[150px] md:max-w-[180px]" title="${displayName}">
+                                    ${displayName}
+                                </span>
+                            </div>
+                            <div class="flex gap-1.5">
+                                <button onclick="deleteItem('${item.id}')" class="p-1 hover:text-red-400 text-slate-600 transition-colors" title="Удалить">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Основные параметры (Входные поля) -->
+                        <div class="space-y-3 bg-slate-950/60 p-3 rounded-lg border border-slate-850">
+                            <!-- Стоимость в значках и объем -->
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                    <label class="block text-slate-500 font-semibold mb-1 uppercase tracking-wider">${t('badgeCostCard')}</label>
+                                    <div class="relative">
+                                        <input 
+                                            type="number" 
+                                            value="${item.badgesCost}" 
+                                            min="1" 
+                                            class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-amber-500/50 font-bold"
+                                            onchange="updateItemParam('${item.id}', 'badgesCost', this.value)"
+                                        >
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-500 font-semibold mb-1 uppercase tracking-wider">${t('receiveCard')}</label>
+                                    <div class="relative">
+                                        <input 
+                                            type="number" 
+                                            value="${item.amountReceived}" 
+                                            min="1" 
+                                            class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-200 focus:outline-none focus:border-amber-500/50 font-bold"
+                                            onchange="updateItemParam('${item.id}', 'amountReceived', this.value)"
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Настройка Рыночной цены -->
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div>
+                                    <label class="block text-slate-500 font-semibold mb-1 uppercase tracking-wider">${t('marketPriceCard')}</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01" 
+                                        value="${item.marketPrice}" 
+                                        min="0" 
+                                        class="w-full bg-slate-950 border border-amber-600/30 rounded px-2 py-1 text-amber-400 focus:outline-none focus:border-amber-500 font-bold text-sm"
+                                        onchange="updateItemParam('${item.id}', 'marketPrice', this.value)"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="block text-slate-500 font-semibold mb-1 uppercase tracking-wider">${t('packCard')}</label>
+                                    <select 
+                                        class="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-slate-300 focus:outline-none focus:border-amber-500/50 text-[11px]"
+                                        onchange="updateItemParam('${item.id}', 'packSize', this.value)"
+                                    >
+                                        <option value="100" ${item.packSize == 100 ? 'selected' : ''}>${t('pack100')}</option>
+                                        <option value="1000" ${item.packSize == 1000 ? 'selected' : ''}>${t('pack1000')}</option>
+                                        <option value="1" ${item.packSize == 1 ? 'selected' : ''}>${t('pack1')}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Эффективность -->
+                        <div class="mt-3 pt-3 border-t border-slate-800 flex justify-between items-center text-xs">
+                            <span class="text-slate-500 uppercase tracking-wider font-semibold">${t('efficiency')}</span>
+                            <span id="efficiency-${item.id}" class="font-bold text-sm text-slate-300">
+                                --
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHtml);
+        });
+    }
+
+    // Обновление одного из параметров ресурса на лету
+    function updateItemParam(id, field, value) {
+        const item = items.find(i => i.id === id);
+        if (item) {
+            item[field] = parseFloat(value) || 0;
+            calculateProfitability();
+        }
+    }
+
+    // Главная логика вычисления
+    function calculateProfitability() {
+        const totalBadges = parseFloat(document.getElementById('total-badges').value) || 0;
+        const applyTax = document.getElementById('apply-tax').checked;
+        const taxMultiplier = applyTax ? 0.9 : 1.0;
+
+        let results = [];
+
+        items.forEach(item => {
+            const pricePerUnit = item.marketPrice / item.packSize;
+            const exchangeValueCoins = item.amountReceived * pricePerUnit * taxMultiplier;
+            const coinPerBadgeRatio = item.badgesCost > 0 ? (exchangeValueCoins / item.badgesCost) : 0;
+
+            const possibleExchanges = item.badgesCost > 0 ? Math.floor(totalBadges / item.badgesCost) : 0;
+            const badgesSpent = possibleExchanges * item.badgesCost;
+            const totalResourceReceived = possibleExchanges * item.amountReceived;
+            const totalCoinsReturn = possibleExchanges * exchangeValueCoins;
+            const remainingBadges = totalBadges - badgesSpent;
+
+            const displayName = item.nameKey ? t(item.nameKey) : item.name;
+
+            const calcData = {
+                ...item,
+                displayName,
+                pricePerUnit,
+                exchangeValueCoins,
+                coinPerBadgeRatio,
+                possibleExchanges,
+                badgesSpent,
+                totalResourceReceived,
+                totalCoinsReturn,
+                remainingBadges
+            };
+
+            results.push(calcData);
+
+            // Визуальное обновление эффективности в карточке
+            const effSpan = document.getElementById(`efficiency-${item.id}`);
+            if (effSpan) {
+                const colorClass = coinPerBadgeRatio > 0.12 ? 'text-emerald-400' : (coinPerBadgeRatio > 0.08 ? 'text-amber-400' : 'text-slate-400');
+                effSpan.innerHTML = `<span class="${colorClass}">${coinPerBadgeRatio.toFixed(4)}</span> <span class="text-[10px] text-slate-500">${t('coinsPerBadge')}</span>`;
+            }
+        });
+
+        // Сортируем по прибыльности
+        results.sort((a, b) => b.coinPerBadgeRatio - a.coinPerBadgeRatio);
+
+        // Рендерим Победителя
+        renderBestDeal(results[0], totalBadges);
+
+        // Рендерим сравнительный график/рейтинг
+        renderRatingBars(results);
+    }
+
+    // Вывод детальной информации по лучшему обмену
+    function renderBestDeal(best, totalBadges) {
+        const box = document.getElementById('best-deal-box');
+        
+        if (!best || best.coinPerBadgeRatio === 0 || totalBadges < best.badgesCost) {
+            box.innerHTML = `
+                <div class="text-center py-8">
+                    <p class="text-slate-400 text-sm">${t('noBadgesError')}</p>
+                </div>
+            `;
+            return;
+        }
+
+        const colors = colorClasses[best.color] || colorClasses.default;
+
+        box.innerHTML = `
+            <div class="space-y-5">
+                <!-- Описание ресурса-победителя -->
+                <div class="flex items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-3xl font-extrabold tracking-wide uppercase accent-font ${colors.text}">
+                            ${best.displayName}
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">${t('bestProfitDesc')}</p>
+                    </div>
+                    <div class="bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg text-center">
+                        <span class="block text-[10px] text-slate-400 uppercase font-semibold">${t('efficiency').replace(':', '')}</span>
+                        <span class="text-base font-bold text-amber-500 accent-font">${best.coinPerBadgeRatio.toFixed(4)} <span class="text-xs font-normal">${t('coinsPerBadge')}</span></span>
+                    </div>
+                </div>
+
+                <!-- Детали обмена на всю сумму значков -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400">${t('availableExchanges')}</span>
+                        <span class="font-bold text-slate-100">${best.possibleExchanges} ${t('times')}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm border-t border-slate-900 pt-2">
+                        <span class="text-slate-400">${t('badgesSpent')}</span>
+                        <span class="font-bold text-amber-500 font-mono">${best.badgesSpent} / ${totalBadges}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm border-t border-slate-900 pt-2">
+                        <span class="text-slate-400">${t('resourceReceived')}</span>
+                        <span class="font-bold text-emerald-400">${best.totalResourceReceived.toLocaleString(currentLang)} ${t('badgesInputSuffix')}</span>
+                    </div>
+                    <div class="flex justify-between items-center text-base border-t border-slate-900 pt-2 font-bold">
+                        <span class="text-slate-300">${t('netRevenue')}</span>
+                        <span class="text-yellow-400 accent-font text-lg">${best.totalCoinsReturn.toFixed(2)} <span class="text-xs">${t('coins')}</span></span>
+                    </div>
+                </div>
+
+                <!-- Остаток -->
+                <div class="text-xs text-slate-500 flex justify-between items-center px-1">
+                    <span>${t('freeBadges')}</span>
+                    <span>${best.remainingBadges} ${t('badgesInputSuffix')}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    // Сравнительные прогресс-бары ресурсов
+    function renderRatingBars(sortedResults) {
+        const container = document.getElementById('rating-bars-container');
+        container.innerHTML = '';
+
+        const maxRatio = sortedResults[0]?.coinPerBadgeRatio || 1;
+
+        sortedResults.forEach((item, index) => {
+            const percentage = maxRatio > 0 ? (item.coinPerBadgeRatio / maxRatio) * 100 : 0;
+            const rank = index + 1;
+
+            let barBgColor = 'bg-slate-700';
+            if (rank === 1) barBgColor = 'bg-gradient-to-r from-amber-600 to-amber-400';
+            else if (rank === 2) barBgColor = 'bg-gradient-to-r from-slate-400 to-slate-300';
+            else if (rank === 3) barBgColor = 'bg-gradient-to-r from-amber-800 to-amber-700';
+
+            const barHtml = `
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="font-bold ${rank === 1 ? 'text-amber-500' : 'text-slate-400'}">#${rank}</span>
+                            <span class="text-slate-200 truncate font-semibold">${item.displayName}</span>
+                        </div>
+                        <div class="font-mono text-slate-300 text-[11px] font-bold">
+                            ${item.coinPerBadgeRatio.toFixed(4)} <span class="text-slate-500 text-[9px]">${t('coinsPerBadge')}</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-slate-950 h-2 rounded overflow-hidden border border-slate-900 flex">
+                        <div class="${barBgColor} h-full rounded transition-all duration-500" style="width: ${percentage}%"></div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', barHtml);
+        });
+    }
+
+    // Сбросить цены к базовым
+    function resetToDefault() {
+        items = JSON.parse(JSON.stringify(defaultItems));
+        renderResources();
+        calculateProfitability();
+        showToast(t('toastReset'));
+    }
+
+    // Обнулить все цены на рынке
+    function clearAllPrices() {
+        items.forEach(item => {
+            item.marketPrice = 0;
+        });
+        renderResources();
+        calculateProfitability();
+        showToast(t('toastClear'));
+    }
+
+    // Показ уведомлений
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        const msgSpan = document.getElementById('toast-message');
+        msgSpan.textContent = message;
+        
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+            toast.classList.remove('opacity-0', 'translate-y-10');
+            toast.classList.add('opacity-100', 'translate-y-0');
+        }, 10);
+
+        setTimeout(() => {
+            toast.classList.remove('opacity-100', 'translate-y-0');
+            toast.classList.add('opacity-0', 'translate-y-10');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 300);
+        }, 3000);
+    }
+
+    // Закрытие модального окна
+    function closeModal() {
+        document.getElementById('item-modal').classList.add('hidden');
+    }
+
+    // Открытие модального окна создания нового ресурса
+    function addNewItemModal() {
+        document.getElementById('modal-name').value = '';
+        document.getElementById('modal-badges').value = '';
+        document.getElementById('modal-yield').value = '';
+        document.getElementById('modal-price').value = '';
+        document.getElementById('modal-pack').value = '100';
+        
+        document.getElementById('item-modal').classList.remove('hidden');
+    }
+
+    // Сохранение созданного ресурса
+    function saveNewItem() {
+        const name = document.getElementById('modal-name').value.trim();
+        const badgesCost = parseInt(document.getElementById('modal-badges').value);
+        const amountReceived = parseInt(document.getElementById('modal-yield').value);
+        const marketPrice = parseFloat(document.getElementById('modal-price').value);
+        const packSize = parseInt(document.getElementById('modal-pack').value);
+
+        if (!name || isNaN(badgesCost) || isNaN(amountReceived) || isNaN(marketPrice)) {
+            // Для локализованного предупреждения без alert():
+            showToast(t('fillFieldsAlert'));
+            return;
+        }
+
+        const id = 'custom-' + Date.now();
+        const colors = ['emerald', 'indigo', 'blue', 'slate', 'amber', 'purple', 'cyan'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+        items.push({
+            id,
+            name, // Сохраняем кастомное имя напрямую
+            nameKey: null, // У кастомных предметов нет фиксированных ключей перевода
+            badgesCost,
+            amountReceived,
+            marketPrice,
+            packSize,
+            color: randomColor
+        });
+
+        closeModal();
+        renderResources();
+        calculateProfitability();
+        showToast(`"${name}" ${t('toastAdd')}`);
+    }
+
+    // Удалить ресурс из калькулятора
+    function deleteItem(id) {
+        const itemToDelete = items.find(i => i.id === id);
+        const name = itemToDelete ? (itemToDelete.nameKey ? t(itemToDelete.nameKey) : itemToDelete.name) : 'Resource';
+        
+        items = items.filter(i => i.id !== id);
+        renderResources();
+        calculateProfitability();
+        showToast(`"${name}" ${t('toastDelete')}`);
+    }
+</script>
+</body>
+</html>
